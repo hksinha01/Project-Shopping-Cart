@@ -6,11 +6,7 @@ const cartModel = require("../controller/cartController")
 
 const createOrder = async function(req,res){
     try{
-// - Create an order for the user
-// - Make sure the userId in params and in JWT token match.
-// - Make sure the user exist
-// - Get cart details in the request body
-      
+
      const id = req.params.userId;
      const input = req.body;
 
