@@ -80,10 +80,41 @@ const createOrder = async function(req,res){
 
 const updateOrder =async function(req,res){
     try{
+        let requestBody = req.body;
+        const userId = req.params.userId
+
+        const { orderId } = requestBody
+
+        if (!validator.isValidReqBody(requestBody)) {
+            res.status(400).send({ status: false, message: 'Please provide cart details' });
+            return;
+        }
+        if (!validator.isValid(orderId)) {
+            return res.status(400).send({ status: false, message: 'orderId is required in the request body' })
+        }
+        if (!validator.isValidobjectId(orderId)) {
+            return res.status(400).send({ status: false, message: `${orderId} is not a valid user id` })
+        }
+        const checkOrder = await orderModel.findOne({ _id: orderId, isDeleted: false })
+        if(!checkOrder){
+            return res.status(404).send({ status: false, message: 'No Such Data Found ' })
+        }
+        if (!(checkOrder.userId == userId)) {
+            return res.status(400).send({ status: false, message: 'order not belongs to the user ' })
+        } 
+        if (!(checkOrder.cancellable === true)) {
+            return res.status(400).send({ status: false, message: 'order didnt have the cancellable policy ' })
+        }
+        if(checkOrder.status === "completed"){
+            return res.status(400).send({status : false,message:"order is already delivered"})
+        }
+        let updateOrder = await orderModel.findOneAndUpdate({ _id: orderId }, { status: "canceled" }, { new: true })
+       return res.status(200).send({ status: true, msg: 'succesfully updated', data: updateOrder })
 
     }
     catch(error){
-
+        console.log(error)
+        return res.status(500).send({status:false,msg:error.message})
     }
 }
 
