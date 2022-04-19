@@ -16,35 +16,36 @@ const orderSchema = new mongoose.Schema({
         },
         quantity: {
             type: Number,
-            min: 1
+            default: 1
         }
     }],
-
     totalPrice: {
-        type: Number //comment: "Holds total price of all the items in the cart"
+        type: Number //, comment: "Holds total price of all the items in the cart"
     },
     totalItems: {
-        type: Number //comment: "Holds total number of items in the cart"
+        type: Number //, comment: "Holds total number of items in the cart"
     },
     totalQuantity: {
-        type: Number, //comment: "Holds total number of items in the cart"
+        type: Number //, comment: "Holds total number of items in the cart"
     },
     cancellable: {
         type: Boolean,
         default: true
     },
-    status :{ 
+    status: {
         type: String,
         default: 'pending',
-        enum: ['pending', 'completed', 'cancled']
+        enum: ["pending", "completed", "cancled"]
     },
-    deletedAt: Date,
+    deletedAt: {
+        type: Date,
+        required: false
+    },
     isDeleted: {
         type: Boolean,
         default: false
-    }
+    },
 
-
-}, { timestamps: true})
+}, { timestamps: true })
 
 module.exports = mongoose.model("order", orderSchema)
