@@ -45,7 +45,7 @@ const register = async function (req, res) {
         }
 
         if (!validator.isValid(phone)) {
-            return res.status(400).send({ status: false, msg: "Please enter a Email Id" })
+            return res.status(400).send({ status: false, msg: "Please enter a Phone Number" })
 
         }
 
