@@ -58,7 +58,7 @@ const products = async (req, res) => {
         if (!validator.isValidSizes(availableSizes)) {
             return res.status(400).send({ status: false, msg: "Available Sizes should be from ['S', 'XS', 'M', 'X', 'L', 'XXL', 'XL']" })
         }
-
+//File Uploaded
         let files = req.files
         if (files && files.length > 0) {
             var uploadedFileURL = await aws.uploadFile(files[0])
@@ -90,7 +90,7 @@ const products = async (req, res) => {
 const getProductbyQuery = async function (req, res) {
     try {
 
-
+//Destructuring
         let { size, name, priceGreaterThan, priceLessThan, priceSort } = req.query
 
 
@@ -174,7 +174,7 @@ const getProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: `${productId} is not a valid product id ` })
         }
 
-        let getProductData = await productModel.findById(productId)
+        let getProductData = await productModel.findOne({_id:productId,isDeleted:false})
 
         if (!getProductData) {
             return res.status(404).send({ status: false, message: "Product is Not Found" })
@@ -192,12 +192,18 @@ const updateProduct = async function (req, res) {
         const productId = req.params.productId
         const data = req.body
 
+        let files = req.files
+
+        if(!(data && files)){
+            return res.status(400).send({status:false,message:"data doesnt exist"})
+        }
+
         if (!validator.isValidobjectId(productId)) {
             return res.status(400).send({ status: false, msg: "Please enter a valid (24 char) Product id" })
         }
 
           if (!validator.isValidReqBody(data)) {
-            if(!(validator.isValidReqBody(req.files)))
+            if(!(validator.isValidReqBody(files)))
             return res.status(400).send({ status: false, msg: "Please enter Data to be updated" })
         }
 
@@ -261,8 +267,8 @@ const updateProduct = async function (req, res) {
             }    
         }
 
-        if (req.files) {
-            let files = req.files
+        if (files) {
+            //let files = req.files
             if (files && files.length > 0) {
                 var uploadedFileURL = await aws.uploadFile(files[0])
             }

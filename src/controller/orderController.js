@@ -21,7 +21,7 @@ const createOrder = async function (req, res) {
         const { userId, items } = input
 
         if (!validator.isValid(userId)) {
-            return res.status(400).send({ status: true, message: 'userid is required in the request body' })
+            return res.status(400).send({ status: false, message: 'userid is required in the request body' })
         }
         if (!validator.isValidobjectId(userId)) {
             return res.status(400).send({ status: false, message: `${userId} is not a valid user id` })
@@ -77,11 +77,10 @@ const createOrder = async function (req, res) {
 
     }
     catch (error) {
+        console.log(error)
         return res.status(500).send({ status: false, msg: error.message })
     }
 }
-
-
 
 const updateOrder =async function(req,res){
     try{

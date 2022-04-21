@@ -185,11 +185,11 @@ const updateCart = async function (req, res) {
         }
 
         if (!validator.isValid(productId)) {
-            return res.status(400).send({ status: true, msg: "ProductId is required" })
+            return res.status(400).send({ status: false, msg: "ProductId is required" })
         }
 
         if (!validator.isValid(removeProduct)) {
-            return res.status(400).send({ status: true, msg: "RemoveProduct is required" })
+            return res.status(400).send({ status: false, msg: "RemoveProduct is required" })
         }
 
         let searchCart = await cartModel.findOne({ userId: userId })
@@ -200,7 +200,7 @@ const updateCart = async function (req, res) {
 
         let findProduct = await productModel.findOne({ productId }).select({ price: 1, _id: 0 })
         if (!findProduct) {
-            return res.status(404).send({ status: true, msg: "Product not found" })
+            return res.status(404).send({ status: false, msg: "Product not found" })
         }
         var getPrice = findProduct.price;
 

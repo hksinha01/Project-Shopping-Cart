@@ -9,13 +9,13 @@ isValidReqBody = function(requestBody){
 }
 
 isValid = function(value){
-    if(typeof value === "undefined" || value === null){
+    if(typeof value == "undefined" || value === null){
         return false
     }
-    if(typeof value === "string" && value.trim().length === 0){  // 
+    if(typeof value == "string" && value.trim().length === 0){  
         return false
     }
-    if(typeof value ==="number" && value.toString().trim().length === 0){
+    if(typeof value =="number" && value.toString().trim().length === 0){
         return false
     }
 
@@ -28,12 +28,12 @@ const isValidSizes = (availableSizes) => {
 }
 
 const isINR = (currencyId) => {
-    return ["INR"].indexOf(currencyId) !== -1
+    return ["INR"].indexOf(currencyId) != -1
 
 }
 
 const isRs = (currencyFormat) => {
-    return ["Rs"].indexOf(currencyFormat) !== -1
+    return ["₹"].indexOf(currencyFormat) != -1
 
 }
 
