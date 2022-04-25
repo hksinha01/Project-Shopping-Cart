@@ -202,11 +202,6 @@ const updateProduct = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please enter a valid (24 char) Product id" })
         }
 
-          if (!validator.isValidReqBody(data)) {
-            if(!(validator.isValidReqBody(files)))
-            return res.status(400).send({ status: false, msg: "Please enter Data to be updated" })
-        }
-
         let { title, description, price, currencyId, currencyFormat, availableSizes } = data
 
         let checkProduct = await productModel.findOne({ _id: productId, isDeleted: true })
@@ -321,5 +316,33 @@ const deleteProduct = async function (req, res) {
 
 }
 
+const wishList =async function(req,res){
+    try{
+        const productId = req.params.productId
+        if (!validator.isValidobjectId(productId)) {
+            return res.status(400).send({ status: false, msg: "Please enter a valid (24 char) Product id" })
+        }
 
-module.exports = { products, getProductbyQuery, getProduct, updateProduct, deleteProduct, }
+        let checkProduct = await productModel.findOne({ _id: productId, isDeleted: false })
+        if (!checkProduct) {
+            return res.status(400).send({ status: false, msg: "Product Already Deleted" })
+        }
+
+       const wishlist = {
+            _id : checkProduct._id,
+            productName : checkProduct.title,
+            description:checkProduct.description,
+            price:checkProduct.price
+        }
+        
+        let update = await productModel.findOneAndUpdate({_id:productId},{wishlist:wishlist},{new: true})
+        return res.status(200).send({status:false,msg:"Added to Wishlist",data:wishlist})
+    }
+    catch(error){
+        console.log(error)
+        return res.status(500).send({status: false,message:error.message})
+    }
+}
+
+
+module.exports = { products, getProductbyQuery, getProduct, updateProduct, deleteProduct, wishList}

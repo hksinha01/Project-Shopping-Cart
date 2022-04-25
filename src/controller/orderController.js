@@ -6,119 +6,145 @@ const cartModel = require("../controller/cartController")
 
 const createOrder = async function (req, res) {
     try {
+        let userId = req.params.userId;
+        let data = req.body;
 
-        const id = req.params.userId;
-        const input = req.body;
+        let { cartId } = data
 
-        if (!validator.isValidobjectId(id)) {
-            return res.status(400).send({ status: false, message: `${id} is not a valid user id` })
-        }
-
-        if (!validator.isValidReqBody(input)) {
-            return res.status(400).send({ status: false, msg: "Please Enter some data to create" })
-        }
-
-        const { userId, items } = input
-
-        if (!validator.isValid(userId)) {
-            return res.status(400).send({ status: false, message: 'userid is required in the request body' })
-        }
         if (!validator.isValidobjectId(userId)) {
-            return res.status(400).send({ status: false, message: `${userId} is not a valid user id` })
+            return res.status(400).send({ status: false, msg: "Please enter a valid userId" })
         }
 
-        if (id !== userId) {
-            return res.status(400).send({ status: false, msg: "Pass Same UserID" })
+        if (!validator.isValidReqBody(data)) {
+            return res.status(400).send({ status: false, msg: "Please enter some data" })
         }
 
-        const user = await userModel.findOne({ userId: id })
-        if (!user) {
-            return res.status(400).send({ status: false, msg: "No Such User Exists" })
+        let findUser = await userModel.findOne({ _id: userId, isDeleted: false })
+        if (!findUser) {
+            return res.status(404).send({ status: false, msg: "User not Found" })
         }
 
-        if (items.length === 0) {
-            return res.status(400).send({ status: false, msg: 'items cant be empty' })
-        }
-        if (!validator.isValid(items)) {
-            return res.status(400).send({ status: false, message: 'items is required in the request body' })
+        if (!validator.isValid(cartId)) {
+            return res.status(400).send({ status: false, msg: "cartId is required" })
         }
 
-        let { productId, quantity } = items
-        let totalPrice = 0
-        let qty = 0
+        if (!validator.isValidobjectId(cartId)) {
+            return res.status(400).send({ status: false, msg: "Please enter a valid cartId" })
+        }
 
-        for (let i = 0; i < items.length; i++) {
-            let productId = items[i].productId
-            quantity = items[i].quantity
+        let checkCart = await cartModel.findOne({ _id: cartId, userId: userId })
+        if (!checkCart) {
+            return res.status(404).send({ status: false, msg: "this user does not have any cart" })
+        }
 
-            const product = await productModel.findOne({ _id: productId, isDeleted: false })
-            if (!product) {
-                return res.status(404).send({ status: false, msg: "No such Product Found" })
+        let totalQuantity = 0
+        for (i = 0; i < checkCart.items.length; i++) {
+            totalQuantity = totalQuantity + checkCart.items[i].quantity
+        }
+
+        const cartDetails = {
+            userId: userId,
+            items: checkCart.items,
+            totalPrice: checkCart.totalPrice,
+            totalItems: checkCart.totalItems,
+            totalQuantity: totalQuantity,
+        }
+
+        let document = await orderModel.create(cartDetails)
+
+        //making cart empty when order created 
+        const makeCartEmpty = await cartModel.findOneAndUpdate({ _id: cartId }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
+
+        return res.status(201).send({ status: true, message: "Success", data: document })
+    }
+
+    catch (error) {
+        res.status(500).send({ status: false, msg: error.message })
+    }
+
+}
+
+const updateOrder = async function (req, res) {
+    try {
+        let userId = req.params.userId;
+        let data = req.body;
+
+        let { orderId, status } = data
+
+        if (!validator.isValidReqBody(data)) {
+            return res.status(400).send({ status: false, msg: "Please enter some data" })
+        }
+
+        let findUser = await userModel.findOne({ _id: userId, isDeleted: false })
+        if (!findUser) {
+            return res.status(404).send({ status: false, msg: "User not Found" })
+        }
+
+        if (!validator.isValid(orderId)) {
+            return res.status(400).send({ status: false, msg: "OrderId is required" })
+        }
+
+        if (!validator.isValidobjectId(orderId)) {
+            return res.status(400).send({ status: false, msg: "Please enter a valid orderId" })
+        }
+
+        if (!validator.isValid(status)) {
+            return res.status(400).send({ status: false, msg: "status is required" })
+        }
+
+        let checkOrder = await orderModel.findOne({ _id: orderId, userId: userId })
+        if (!checkOrder) {
+            return res.status(404).send({ status: false, msg: "Order not Found for this User" })
+        }
+        if (checkOrder.cancellable == true) {
+
+            if (checkOrder.status == 'pending') {
+
+                if (!validator.isStatus(status)) {
+                    return res.status(400).send({ status: false, msg: "Please enter a valid status" })
+
+                }
+                let alterStatus = await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { status: status } }, { new: true })
+                if (!alterStatus) {
+                    return res.status(400).send({ status: false, msg: "Unable to change the status" })
+                }
+                return res.status(200).send({ status: true, message: "Order Updated Successfully", data: alterStatus })
             }
 
-            price = product.price
-
-            totalPrice = totalPrice + (price * quantity)
-
-            qty = qty + quantity
-        }
-        const final = {
-            userId: id,
-            items: items,
-            totalPrice: totalPrice,
-            totalItems: items.length,
-            totalQuantity: qty
-
+            if (checkOrder.status == 'completed') {
+                return res.status(400).send({ status: false, message: "its Completed unable to change status" })
+            }
 
         }
 
-        const createProduct = await orderModel.create(final)
-        return res.status(201).send({ status: true, msg: 'sucesfully created order', data: createProduct })
+        if (checkOrder.cancellable == false) {
 
+            if (checkOrder.status == 'pending') {
+
+                if (!validator.isStatus(status)) {
+                    return res.status(400).send({ status: false, msg: "Please enter a valid status" })
+                }
+
+                if (status == 'cancelled') {
+                    return res.status(400).send({ status: false, msg: "its not cancellable" })
+                }
+
+                let alterStatus = await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { status: status } }, { new: true })
+                if (!alterStatus) {
+                    return res.status(400).send({ status: false, msg: "Unable to change the status" })
+                }
+
+                return res.status(200).send({ status: true, message: "Order Updated Successfully", data: alterStatus })
+            }
+
+            if (checkOrder.status == 'completed') {
+                return res.status(400).send({ status: false, message: "its Completed unable to change status" })
+            }
+
+        }
     }
     catch (error) {
-        console.log(error)
-        return res.status(500).send({ status: false, msg: error.message })
+        res.status(500).send({ status: false, msg: error.message })
     }
 }
-
-const updateOrder =async function(req,res){
-    try{
-        let requestBody = req.body;
-        const userId = req.params.userId
-
-        const { orderId } = requestBody
-
-        if (!validator.isValidReqBody(requestBody)) {
-            res.status(400).send({ status: false, message: 'Please provide cart details' });
-            return;
-        }
-        if (!validator.isValid(orderId)) {
-            return res.status(400).send({ status: false, message: 'orderId is required in the request body' })
-        }
-        if (!validator.isValidobjectId(orderId)) {
-            return res.status(400).send({ status: false, message: `${orderId} is not a valid user id` })
-        }
-        const checkOrder = await orderModel.findOne({ _id: orderId, isDeleted: false })
-        if(!checkOrder){
-            return res.status(404).send({ status: false, message: 'No Such Data Found ' })
-        }
-        if (!(checkOrder.userId == userId)) {
-            return res.status(400).send({ status: false, message: 'order not belongs to the user ' })
-        } 
-        if (!(checkOrder.cancellable === true)) {
-            return res.status(400).send({ status: false, message: 'order didnt have the cancellable policy ' })
-        }
-        if(checkOrder.status === "completed"){
-            return res.status(400).send({status : false,message:"order is already delivered"})
-        }
-        let updateOrder = await orderModel.findOneAndUpdate({ _id: orderId }, { status: "canceled" }, { new: true })
-       return res.status(200).send({ status: true, msg: 'succesfully updated', data: updateOrder })
-
-    }
-    catch(error){
-        return res.status(500).send({status:false,msg:error.message})
-    }
-}
-
 module.exports = { createOrder, updateOrder }

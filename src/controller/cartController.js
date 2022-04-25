@@ -10,7 +10,7 @@ const createCart = async function (req, res) {
         let id = req.params.userId;
         let data = req.body;
 
-        let { userId, items } = data
+        let { userId, items } = data // destructuring
 
         if (!validator.isValidobjectId(id)) {
             return res.status(400).send({ status: false, msg: "Please enter a valid userId" })
@@ -98,7 +98,7 @@ const createCart = async function (req, res) {
 
 const getCart = async function (req, res) {
     try {
-        userId = req.params.userId;
+       let userId = req.params.userId;
 
         let findUser = await userModel.findById(userId)
         if (!findUser) {
@@ -123,7 +123,7 @@ const getCart = async function (req, res) {
 
 const deleteCart = async function (req, res) {
     try {
-        userId = req.params.userId;
+        let userId = req.params.userId;
 
         let findUser = await userModel.findById(userId)
         if (!findUser) {

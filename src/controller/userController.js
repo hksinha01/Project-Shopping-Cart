@@ -88,7 +88,7 @@ const register = async function (req, res) {
             return res.status(400).send({ status: false, msg: " Enter Pincode" })
         }
 
-        if (!(shipping.pincode.toString().length === 6)) {
+        if (!(shipping.pincode.toString().length === 6)) { 
             return res.status(400).send({ status: false, msg: "Enter Valid Shipping Pincode" })
         }
 
@@ -114,7 +114,7 @@ const register = async function (req, res) {
             var uploadedFileURL = await aws.uploadFile(files[0])
 
         } else {
-            return res.status(400).send({ msg: "No file found" })
+            return res.status(400).send({ status:false,msg: "No file found" })
         }
 
 
@@ -177,7 +177,7 @@ const login = async function (req, res) {
             res.status(401).send({ status: false, msg: "User does not exist" });
         }
 
-        const token = jwt.sign({
+        const token = jwt.sign({    //HFYFVVH.YFVVHVH.CVHVHH
             userId: user._id.toString(),
             group: "11",
             iat: Math.floor(Date.now() / 1000),         //doubt clear about this after some time   //payload
@@ -284,7 +284,7 @@ const updateProfile = async (req, res) => {
        
 
         if (address) {
-            const a = JSON.parse(address)  // Converting Striing to JSON
+            const a = JSON.parse(address)  // Converting String to JSON
             const { shipping, billing } = a
 
             if (!validator.isValid(shipping.street)) {

@@ -12,9 +12,14 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  reviews: {
+    type: Number,
+    default: 0,
+},
+  wishlist:[Object],
   price: {
     type: Number,
-    required: true //, valid number/decimal
+    required: true 
   },
   currencyId: {
     type: String,

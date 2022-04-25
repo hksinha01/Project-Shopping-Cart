@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true 
-    },
+      },
     lname: {
         type: String,
         required: true,
@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: /^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/,
+        match: /^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/, //xyz@gmail.com
         trim:true
     },
     profileImage: {

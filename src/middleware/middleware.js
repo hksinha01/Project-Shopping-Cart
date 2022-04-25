@@ -3,7 +3,7 @@ const validator = require("../validator/validator")
 
 const authentication = function (req, res, next) {
     try {
-        let token = req.headers["authorization"]
+        let token = req.headers["authorization"] // Bearer eyhijlmdaoaihd.saiudhindi.iduhiajdiaj
         if (!token) {
             return res.status(400).send({ status: false, msg: "Please pass Token for authentication" })
         }
